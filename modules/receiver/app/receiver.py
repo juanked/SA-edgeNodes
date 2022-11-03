@@ -82,7 +82,7 @@ while True:
     if packet is not None:
         # Display the packet text and rssi
         # display.fill(0)
-        print("packet: " + contador)
+        print("packet: " + str(contador))
         contador += 1
         prev_packet = packet
         packet_text = str(prev_packet, "unicode_escape")
