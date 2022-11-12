@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: receiver
+  spec:
+    selector:
+    matchLabels:
+      app: receiver
+    template:
+    metadata:
+      labels:
+        app: receiver
+    spec:
+      containers:
+      - name: receiver
+        image: sanoderegistry.azurecr.io/receiver:latest
+        # ports:
+        # - name: http
+        #   containerPort: 8080
+        #   protocol: TCP
+        securityContext:
+          privileged: true
