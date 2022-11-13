@@ -1,22 +1,28 @@
 apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: receiver
-  spec:
-    selector:
+kind: Deployment
+metadata:
+  labels:
+    app: receiver
+  name: edge-receiver
+spec:
+  replicas: 1
+  selector:
     matchLabels:
       app: receiver
-    template:
+  template:
     metadata:
       labels:
         app: receiver
     spec:
       containers:
-      - name: receiver
+      - name: edge-receiver
         image: sanoderegistry.azurecr.io/receiver:latest
+        imagePullPolicy: IfNotPresent
         # ports:
         # - name: http
         #   containerPort: 8080
         #   protocol: TCP
         securityContext:
           privileged: true
+      imagePullSecrets:
+      -  name: azsecret
