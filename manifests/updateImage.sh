@@ -14,6 +14,7 @@ git config --global user.email "david@juanked.es"
 
 tmpDir="$(mktemp -d)"
 echo "$tmpDir"
+echo "$GITHUBKEY"
 cd "$tmpDir" || exit
 git clone "https://$username:$GITHUBKEY@github.com/juanked/SA-DevOps.git"
 repoDir="$tmpDir/SA-DevOps"
