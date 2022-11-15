@@ -132,10 +132,14 @@ while True:
 
     if not btnA.value:
         # Send Button A
-        display.fill(0)
-        button_a_data = bytes("Button A!\r\n", "utf-8")
-        rfm9x.send(button_a_data)
-        display.text('Sent Button A!', 25, 15, 1)
+        # display.fill(0)
+        # button_a_data = bytes("Button A!\r\n", "utf-8")
+        # rfm9x.send(button_a_data)
+        # display.text('Sent Button A!', 25, 15, 1)
+        if display.power():
+            display.poweroff()
+        else:
+            display.poweron()
     elif not btnB.value:
         # Send Button B
         display.fill(0)
