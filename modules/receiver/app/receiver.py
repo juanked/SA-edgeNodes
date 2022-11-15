@@ -136,7 +136,7 @@ while True:
         # button_a_data = bytes("Button A!\r\n", "utf-8")
         # rfm9x.send(button_a_data)
         # display.text('Sent Button A!', 25, 15, 1)
-        if display.power():
+        if display._power:
             display.poweroff()
         else:
             display.poweron()
