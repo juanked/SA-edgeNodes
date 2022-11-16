@@ -1,15 +1,8 @@
-FROM arm64v8/python:3.9-alpine3.16
+FROM sanoderegistry.azurecr.io/sa-python-linux.arm64:1
 
-WORKDIR /app
+WORKDIR /usr/bin/app
 
-RUN apk add --update --no-cache --virtual .tmp-build-deps \
-    gcc libc-dev linux-headers postgresql-dev i2c-tools \
-    && apk add libffi-dev
-COPY requirements.txt ./
-# RUN pip3 install --no-cache-dir --upgrade pip
-RUN pip3 install --no-cache-dir -r requirements.txt
+COPY app/ .
 
-COPY . .
-
-WORKDIR /app/app/
+WORKDIR /usr/bin/app/app/
 CMD ["python", "receiver.py"]
