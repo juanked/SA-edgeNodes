@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd "$SCRIPT_DIR" || exit
-filename="kustomize/deployment.yaml"
+filename="receiver/deployment.yaml"
 search="image:.*"
 replace="image: sanoderegistry.azurecr.io/receiver:$BUILD_BUILDID"
 
@@ -20,8 +20,8 @@ repoDir="$tmpDir/SA-DevOps"
 cd "$repoDir" || exit
 sed -i "s@$search@$replace@" $filename
 # sed -i "s@$search@$replace@" $filename
-# cp "$SCRIPT_DIR/$filename" kustomize/deployment.yaml
-git add kustomize/deployment.yaml
+# cp "$SCRIPT_DIR/$filename" receiver/deployment.yaml
+git add receiver/deployment.yaml
 git commit -m "Nuevo manifest $BUILD_BUILDID"
 git push "https://$username:$GITHUBKEY@github.com/juanked/SA-DevOps.git"
 trap 'rm -rf -- "$tmpDir"' EXIT
