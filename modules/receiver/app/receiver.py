@@ -80,15 +80,19 @@ response = os.system("ping -c 1 " + alo)
 
 # and then check the response...
 if response == 0:
-  print(f"{alo}, is up!")
+    print(f"{alo}, is up!")
 else:
-  print(f"{alo}, is down!")
+    print(f"{alo}, is down!")
 # getClientInformation
+c = 0
 hostname = os.environ['NODE_NAME']
 edgeNodeID = getEdgeNodeID(hostname)
 while edgeNodeID == -1:
     time.sleep(10)
+    c += 1
     edgeNodeID = getEdgeNodeID(hostname)
+    if c > 20:
+        break
 
 contador = 0
 
