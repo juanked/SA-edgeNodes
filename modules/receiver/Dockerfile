@@ -1,4 +1,4 @@
-FROM sanoderegistry.azurecr.io/sa-python-linux.arm64:1
+FROM sanoderegistry.azurecr.io/sa-python-linux.arm64:2
 
 WORKDIR /usr/bin/app
 
