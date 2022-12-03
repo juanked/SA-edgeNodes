@@ -75,10 +75,19 @@ display.text('RasPi LoRa', 35, 0, 1)
 display.text(time.strftime("%H:%M:%S", time.localtime()), 35, 20, 1)
 display.show()
 
+alo = "google.com"  # example
+response = os.system("ping -c 1 " + alo)
+
+# and then check the response...
+if response == 0:
+  print(f"{alo}, is up!")
+else:
+  print(f"{alo}, is down!")
 # getClientInformation
 hostname = os.environ['NODE_NAME']
 edgeNodeID = getEdgeNodeID(hostname)
 while edgeNodeID == -1:
+    time.sleep(10)
     edgeNodeID = getEdgeNodeID(hostname)
 
 contador = 0
