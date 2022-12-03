@@ -77,6 +77,7 @@ display.show()
 
 # getClientInformation
 hostname = os.environ['NODE_NAME']
+print(hostname)
 edgeNodeID = getEdgeNodeID(hostname)
 
 contador = 0

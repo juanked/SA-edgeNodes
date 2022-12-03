@@ -29,6 +29,9 @@ def getEdgeNodeID(hostname) -> int:
     except requests.exceptions.RequestException as e:  # This is the correct syntax
         print(e.response)
         return -1
+    if getEdgeNode.status_code == 404:
+        print("Error 404")
+        return False
     jsonEdgeNode = getEdgeNode.json()
     edgeNodeID = jsonEdgeNode[0]["id"]
     return edgeNodeID
