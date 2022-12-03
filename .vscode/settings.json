@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": [
+        "./modules/receiver/app",
+        "./modules/receiver/app",
+        "./modules/receiver/app"
+    ]
+}

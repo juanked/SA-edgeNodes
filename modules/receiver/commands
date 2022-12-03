@@ -1,2 +1,5 @@
 sudo docker build -t receiver .
 sudo docker run --privileged -it --rm --name receiver receiver
+
+
+pipreqs . ===> genera requirements.txt automáticamente

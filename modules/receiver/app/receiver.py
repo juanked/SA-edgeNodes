@@ -5,9 +5,10 @@
 Example for using the RFM9x Radio with Raspberry Pi.
 
 Learn Guide: https://learn.adafruit.com/lora-and-lorawan-for-raspberry-pi
-Author: Brent Rubell for Adafruit Industries                        
+Author: Brent Rubell for Adafruit Industries
 """
 # Import Python System Libraries
+import os
 import binascii
 import py_compile
 import time
@@ -23,6 +24,13 @@ import adafruit_rfm9x
 import json
 import xxtea
 import datetime
+from tb_device_mqtt import TBDeviceMqttClient, TBPublishInfo
+from EdgeNodeConfiguration import *
+from ActuatorConfiguration import *
+from MQTTConnection import *
+from Telemetry import *
+from dataSuplier import *
+from edgeProcessor import *
 
 key = b"smartAgriculture"
 
@@ -67,91 +75,100 @@ display.text('RasPi LoRa', 35, 0, 1)
 display.text(time.strftime("%H:%M:%S", time.localtime()), 35, 20, 1)
 display.show()
 
+# getClientInformation
+hostname = os.uname()[1]
+edgeNodeID = getEdgeNodeID(hostname)
+
 contador = 0
 
 while True:
-    packet = None
-    # draw a box to clear the image
-
-    # check for packet rx
-    packet = rfm9x.receive(with_header=True)
-    # if packet is None:
-    #     display.show()
-    #     display.text('- Waiting for PKT -', 15, 20, 1)
-    # else:
-    if packet is not None:
-        # Display the packet text and rssi
-        # display.fill(0)
-        print("packet: " + str(contador))
-        contador += 1
-        prev_packet = packet
-        packet_text = str(prev_packet, "unicode_escape")
-
-        doc = (json.loads(packet_text))
-        print(json.dumps(doc, indent=4))
-
-        tag = doc["tag"]
-        battConnection = doc["bat"]["con"]
-        battVoltage = doc["bat"]["vol"]
-        locationLat = xxtea.decrypt(binascii.a2b_hex(doc["loc"]["lat"]),
-                                    key,
-                                    padding=False).decode("utf-8")
-        locationLat = float(locationLat.rstrip("\x00"))
-        locationLng = xxtea.decrypt(binascii.a2b_hex(doc["loc"]["lng"]),
-                                    key,
-                                    padding=False).decode("utf-8")
-        locationLng = float(locationLng.rstrip("\x00"))
-        satellites = xxtea.decrypt(binascii.a2b_hex(doc["loc"]["sat"]),
-                                   key,
-                                   padding=False).decode("utf-8")
-        satellites = int(satellites.rstrip("\x00"))
-        altitude = xxtea.decrypt(binascii.a2b_hex(doc["loc"]["alt"]),
-                                 key,
-                                 padding=False).decode("utf-8")
-        altitude = float(altitude.rstrip("\x00"))
-        age = doc["loc"]["age"]
-        temperatureAir = doc["mea"]["tair"]
-        humidityAir = doc["mea"]["hair"]
-        humiditySoil = doc["mea"]["hsoi"]
-        gpsDateTime = doc["time"]
-        if gpsDateTime == "2000-00-00 00:00:00":
-            gpsDateTime = "2000-01-01 00:00:00"
-        dateTime = datetime.datetime.strptime(gpsDateTime, "%Y-%m-%d %H:%M:%S")
-        print(dateTime.date())
-        print(dateTime.time())
-
-        print("tag: " + tag)
-        print("satellites: " + str(satellites))
-        print("lat: " + str(locationLat))
-        print("lng: " + str(locationLng))
-        print("alt: " + str(altitude))
-        print("----------------")
-        # display.text('RX: ', 0, 0, 1)
-        # display.text(packet_text, 25, 0, 1)
-        time.sleep(1)
-
     if not btnA.value:
-        # Send Button A
-        # display.fill(0)
-        # button_a_data = bytes("Button A!\r\n", "utf-8")
-        # rfm9x.send(button_a_data)
-        # display.text('Sent Button A!', 25, 15, 1)
         if display._power:
             display.poweroff()
         else:
             display.poweron()
-    elif not btnB.value:
-        # Send Button B
-        display.fill(0)
-        button_b_data = bytes("Button B!\r\n", "utf-8")
-        rfm9x.send(button_b_data)
-        display.text('Sent Button B!', 25, 15, 1)
-    elif not btnC.value:
-        # Send Button C
-        display.fill(0)
-        button_c_data = bytes("Button C!\r\n", "utf-8")
-        rfm9x.send(button_c_data)
-        display.text('Sent Button C!', 25, 15, 1)
+    time.sleep(1)
+
+    packet = None
+    packet = rfm9x.receive(with_header=True)
+
+    if packet is None:
+        time.sleep(3)
+        continue
+    print("packet: " + str(contador))
+    contador += 1
+    prev_packet = packet
+    packet_text = str(prev_packet, "unicode_escape")
+
+    if "#" not in packet_text:
+        time.sleep(3)
+        continue
+
+    cryptMessage = packet_text.split("#")
+    serial = cryptMessage[0]
+    edgeConfig = searchConfig(serial, edgeNodeID)
+    if edgeConfig is None:
+        print("edgeConfig=None")
+        time.sleep(3)
+        continue
+    try:
+        decryptMessage = xxtea.decrypt(binascii.a2b_hex(
+            cryptMessage[1]), key, padding=False).decode("utf-8")
+    except binascii.Error as e:
+        print(e)
+        time.sleep(3)
+        continue
+    print(decryptMessage)
+    decryptMessage = decryptMessage.split(";")
+    telemetry = Telemetry(bool(decryptMessage[0]), float(decryptMessage[1]), float(decryptMessage[2]),
+                          float(decryptMessage[3]), float(decryptMessage[4]),
+                          int(decryptMessage[5]), float(decryptMessage[6]),
+                          float(decryptMessage[7]), int(decryptMessage[8]), int(decryptMessage[9].rstrip('\x00')))
+    plantationID = edgeConfig.plantationID
+    actuators = searchActuators(plantationID)
+
+    mqtt = searchMQTT(plantationID)
+    if mqtt is None:
+        print("mqtt=None")
+        time.sleep(3)
+        continue
+    client = TBDeviceMqttClient(host=mqtt.host, port=mqtt.port,
+                                client_id=mqtt.clientID, username=mqtt.username, password=mqtt.pwd, quality_of_service=1)
+    client.connect()
+    print(telemetry.getTelemetry())
+    result = client.send_telemetry(telemetry.getTelemetry())
+    success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
+    print("success: ", end="")
+    print(success)
+    if actuators is None:
+        client.disconnect()
+        time.sleep(3)
+        continue
+    wateringNecessary = isWateringNecessary(
+        edgeConfig, telemetry.airTemperature, telemetry.airHumidity, telemetry.soilMoisture, telemetry.leafMoisture)
+    packetToSend = watering(actuators, wateringNecessary)
+    for element in packetToSend:
+        print("Paquete a enviar: ", end="")
+        print(element)
+        # rfm9x.send(element)
+    # client.connect()
+    result = client.send_telemetry({"isWatering": wateringNecessary})
+    success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
+    client.disconnect()
+
+    time.sleep(3)
+
+    # elif not btnB.value:
+    #     # Send Button B
+    #     display.fill(0)
+    #     button_b_data = bytes("Button B!\r\n", "utf-8")
+    #     rfm9x.send(button_b_data)
+    #     display.text('Sent Button B!', 25, 15, 1)
+    # elif not btnC.value:
+    #     # Send Button C
+    #     display.fill(0)
+    #     button_c_data = bytes("Button C!\r\n", "utf-8")
+    #     rfm9x.send(button_c_data)
+    #     display.text('Sent Button C!', 25, 15, 1)
 
     # display.show()
-    time.sleep(3)
