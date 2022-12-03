@@ -30,8 +30,8 @@ def getEdgeNodeID(hostname) -> int:
         print(e.response)
         return -1
     if getEdgeNode.status_code == 404:
-        print("Error 404")
-        return False
+        print("getEdgeNodeID: Error 404")
+        return -1
     jsonEdgeNode = getEdgeNode.json()
     edgeNodeID = jsonEdgeNode[0]["id"]
     return edgeNodeID
@@ -58,7 +58,7 @@ def getConfig(edgeNodeID) -> bool:
         print(e.response)
         return False
     if edgeNodeConfig.status_code == 404:
-        print("Error 404")
+        print("getConfig: Error 404")
         return False
     date = edgeNodeConfig.headers.get('Date').removesuffix(" GMT")
     oldDatetimeConfig = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S")
@@ -110,7 +110,7 @@ def getActuators(plantationID) -> bool:
         print(e.response)
         return False
     if actuatorResponse.status_code == 404:
-        print("Error 404")
+        print("getActuators: Error 404")
         return False
     date = actuatorResponse.headers.get('Date').removesuffix(" GMT")
     oldDatetimeActuator = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S")
@@ -145,7 +145,7 @@ def getMQTT(mqttConfigID) -> bool:
         print(e.response)
         return False
     if mqttResponse.status_code == 404:
-        print("Error 404")
+        print("getMQTT: Error 404")
         return False
     date = mqttResponse.headers.get('Date').removesuffix(" GMT")
     oldDatetimeMQTT = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S")

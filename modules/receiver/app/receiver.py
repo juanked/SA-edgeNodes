@@ -76,8 +76,10 @@ display.text(time.strftime("%H:%M:%S", time.localtime()), 35, 20, 1)
 display.show()
 
 # getClientInformation
-hostname = os.uname()[1]
+hostname = os.environ['NODE_NAME']
 edgeNodeID = getEdgeNodeID(hostname)
+while edgeNodeID == -1:
+    edgeNodeID = getEdgeNodeID(hostname)
 
 contador = 0
 
