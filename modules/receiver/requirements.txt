@@ -2,6 +2,9 @@ Adafruit_Blinka==8.5.0
 adafruit_circuitpython_rfm9x==2.2.12
 adafruit_circuitpython_ssd1306==2.12.10
 adafruit_ssd1306==1.6.2
-board==1.0
+# board==1.0
 xxtea==2.0.0.post0
 RPi.GPIO==0.7.1
+requests==2.22.0
+python_dateutil==2.8.2
+tb-mqtt-client==1.4.1
