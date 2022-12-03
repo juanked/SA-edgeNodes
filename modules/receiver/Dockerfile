@@ -5,4 +5,4 @@ WORKDIR /usr/bin/app
 COPY app app
 
 WORKDIR /usr/bin/app/app/
-CMD ["python", "receiver.py"]
+CMD ["python","-u", "receiver.py"]
