@@ -76,8 +76,7 @@ display.text(time.strftime("%H:%M:%S", time.localtime()), 35, 20, 1)
 display.show()
 
 # getClientInformation
-hostname = os.environ['NODE_NAME']
-print(hostname)
+hostname = os.uname()[1]
 edgeNodeID = getEdgeNodeID(hostname)
 
 contador = 0
@@ -135,27 +134,31 @@ while True:
         continue
     client = TBDeviceMqttClient(host=mqtt.host, port=mqtt.port,
                                 client_id=mqtt.clientID, username=mqtt.username, password=mqtt.pwd, quality_of_service=1)
-    client.connect()
-    print(telemetry.getTelemetry())
-    result = client.send_telemetry(telemetry.getTelemetry())
-    success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
-    print("success: ", end="")
-    print(success)
-    if actuators is None:
+    try:
+        client.connect()
+        print(telemetry.getTelemetry())
+        result = client.send_telemetry(telemetry.getTelemetry())
+        success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
+        print("success: ", end="")
+        print(success)
+        if actuators is None:
+            client.disconnect()
+            time.sleep(3)
+            continue
+        wateringNecessary = isWateringNecessary(
+            edgeConfig, telemetry.airTemperature, telemetry.airHumidity, telemetry.soilMoisture, telemetry.leafMoisture)
+        packetToSend = watering(actuators, wateringNecessary)
+        for element in packetToSend:
+            print("Paquete a enviar: ", end="")
+            print(element)
+            # rfm9x.send(element)
+        # client.connect()
+        result = client.send_telemetry({"isWatering": wateringNecessary})
+        success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
         client.disconnect()
-        time.sleep(3)
-        continue
-    wateringNecessary = isWateringNecessary(
-        edgeConfig, telemetry.airTemperature, telemetry.airHumidity, telemetry.soilMoisture, telemetry.leafMoisture)
-    packetToSend = watering(actuators, wateringNecessary)
-    for element in packetToSend:
-        print("Paquete a enviar: ", end="")
-        print(element)
-        # rfm9x.send(element)
-    # client.connect()
-    result = client.send_telemetry({"isWatering": wateringNecessary})
-    success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
-    client.disconnect()
+    except OSError as e:
+        print("Error during MQTT connection")
+        print(e)
 
     time.sleep(3)
 
