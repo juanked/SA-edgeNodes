@@ -75,7 +75,7 @@ display.text('RasPi LoRa', 35, 0, 1)
 display.text(time.strftime("%H:%M:%S", time.localtime()), 35, 20, 1)
 display.show()
 
-alo = "google.com"  # example
+alo = "8.8.8.8"  # example
 response = os.system("ping -c 1 " + alo)
 
 # and then check the response...
