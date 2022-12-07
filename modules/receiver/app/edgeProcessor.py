@@ -23,15 +23,18 @@ def isWateringNecessary(config: EdgeNodeConfiguration,
 
 
 def moistureConverter(soilMoisture, sensorLinearFit) -> float:
-    """Return a percentage value between 0 and 100%"""
-    sensorLinearFit = sensorLinearFit.replace("(", "")
-    sensorLinearFit = sensorLinearFit.replace(")", "")
-    param = sensorLinearFit.split(",")
+    """Return water quantity in m3 of water in m3 of dry soil"""
 
-    slope = float(param[0])
-    intercept = float(param[1])
-    waterVolume = ((1.0/int(soilMoisture))*slope)+intercept
-    # In cm^3/cm^3
+    res = sensorLinearFit.strip("()").split(",")
+    a = float(res[0])
+    b = float(res[1])
+    c = float(res[2])
+    print(a)
+    print(b)
+    print(c)
+    waterVolume = a*pow(soilMoisture, 2) + b*soilMoisture + c
+    print(waterVolume)
+
     return waterVolume
 
 

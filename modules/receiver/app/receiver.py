@@ -75,7 +75,7 @@ display.text('RasPi LoRa', 35, 0, 1)
 display.text(time.strftime("%H:%M:%S", time.localtime()), 35, 20, 1)
 display.show()
 
-alo = "8.8.8.8"  # example
+alo = "google.com"  # example
 response = os.system("ping -c 1 " + alo)
 
 # and then check the response...
@@ -87,10 +87,11 @@ else:
 c = 0
 hostname = os.environ['NODE_NAME']
 edgeNodeID = getEdgeNodeID(hostname)
+
 while edgeNodeID == -1:
+    edgeNodeID = getEdgeNodeID(hostname)
     time.sleep(10)
     c += 1
-    edgeNodeID = getEdgeNodeID(hostname)
     if c > 20:
         break
 
@@ -112,6 +113,9 @@ while True:
         continue
     print("packet: " + str(contador))
     contador += 1
+    if prev_packet == packet:
+        time.sleep(3)
+        continue
     prev_packet = packet
     packet_text = str(prev_packet, "unicode_escape")
 
@@ -135,10 +139,13 @@ while True:
         continue
     print(decryptMessage)
     decryptMessage = decryptMessage.split(";")
+    soilMoisture = int(decryptMessage[8])
     telemetry = Telemetry(bool(decryptMessage[0]), float(decryptMessage[1]), float(decryptMessage[2]),
                           float(decryptMessage[3]), float(decryptMessage[4]),
                           int(decryptMessage[5]), float(decryptMessage[6]),
-                          float(decryptMessage[7]), int(decryptMessage[8]), int(decryptMessage[9].rstrip('\x00')))
+                          float(decryptMessage[7]), float(moistureConverter(
+                              soilMoisture, edgeConfig.sensorLinearFit)),
+                          float(edgeConfig.fieldCapacity), int(decryptMessage[9].rstrip('\x00')))
     plantationID = edgeConfig.plantationID
     actuators = searchActuators(plantationID)
 
@@ -161,7 +168,7 @@ while True:
             time.sleep(3)
             continue
         wateringNecessary = isWateringNecessary(
-            edgeConfig, telemetry.airTemperature, telemetry.airHumidity, telemetry.soilMoisture, telemetry.leafMoisture)
+            edgeConfig, telemetry.airTemperature, telemetry.airHumidity, soilMoisture, telemetry.leafMoisture)
         packetToSend = watering(actuators, wateringNecessary)
         for element in packetToSend:
             print("Paquete a enviar: ", end="")
