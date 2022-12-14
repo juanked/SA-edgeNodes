@@ -145,7 +145,7 @@ while True:
                           int(decryptMessage[5]), float(decryptMessage[6]),
                           float(decryptMessage[7]), float(moistureConverter(
                               soilMoisture, edgeConfig.sensorLinearFit)),
-                          float(edgeConfig.fieldCapacity), int(decryptMessage[9].rstrip('\x00')))
+                          float(edgeConfig.fieldCapacity), bool(decryptMessage[9].rstrip('\x00')))
     plantationID = edgeConfig.plantationID
     actuators = searchActuators(plantationID)
 
@@ -169,7 +169,7 @@ while True:
             continue
         wateringNecessary = isWateringNecessary(
             edgeConfig, telemetry.airTemperature, telemetry.airHumidity, soilMoisture, telemetry.leafMoisture)
-        packetToSend = watering(actuators, wateringNecessary)
+        packetToSend = watering(actuators, wateringNecessary, key)
         for element in packetToSend:
             print("Paquete a enviar: ", end="")
             print(element)
