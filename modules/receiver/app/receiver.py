@@ -173,7 +173,7 @@ while True:
         for element in packetToSend:
             print("Paquete a enviar: ", end="")
             print(element)
-            # rfm9x.send(element)
+            rfm9x.send(bytes(element, "utf-8"))
         # client.connect()
         result = client.send_telemetry({"isWatering": wateringNecessary})
         success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
