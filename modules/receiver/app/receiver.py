@@ -115,8 +115,12 @@ while True:
         time.sleep(3)
         continue
     prev_packet = packet
-    packet_text = str(prev_packet, "unicode_escape")
-
+    try:
+        packet_text = str(prev_packet, "unicode_escape")
+    except UnicodeDecodeError as e:
+        print(e)
+        time.sleep(3)
+        continue
     if "#" not in packet_text:
         time.sleep(3)
         continue
@@ -177,8 +181,8 @@ while True:
         print(wateringNecessary)
         for element in packetToSend:
             print("Paquete a enviar: ", end="")
-            print(element)
-            rfm9x.send(bytes(element, "utf-8"))
+            print(bytes("!"+element, "utf-8"))
+            rfm9x.send(bytes("!"+element, "utf-8"))
         # client.connect()
         result = client.send_telemetry({"isWatering": wateringNecessary})
         success = result.get() == TBPublishInfo.TB_ERR_SUCCESS
