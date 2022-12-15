@@ -1,7 +1,7 @@
 class Telemetry:
     def __init__(self, batteryConnect: bool, batteryVoltage: float, locationLat: float,
                  locationLng: float, locationAltitude: float, locationSatellites: int,
-                 airTemperature: float, airHumidity: float, waterContent: int, fieldCapacity: float, leafMoisture: int):
+                 airTemperature: float, airHumidity: float, waterContent: int, fieldCapacity: float, leafMoisture: bool):
         self.batteryConnect = batteryConnect
         self.batteryVoltage = batteryVoltage
         self.locationLat = locationLat

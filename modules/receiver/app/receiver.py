@@ -111,8 +111,6 @@ while True:
     if packet is None:
         time.sleep(3)
         continue
-    print("packet: " + str(contador))
-    contador += 1
     if prev_packet == packet:
         time.sleep(3)
         continue
@@ -123,6 +121,8 @@ while True:
         time.sleep(3)
         continue
 
+    print("packet: " + str(contador))
+    contador += 1
     cryptMessage = packet_text.split("#")
     serial = cryptMessage[0]
     edgeConfig = searchConfig(serial, edgeNodeID)
@@ -140,12 +140,15 @@ while True:
     print(decryptMessage)
     decryptMessage = decryptMessage.split(";")
     soilMoisture = int(decryptMessage[8])
+    leafMoisture = bool(int(decryptMessage[9]))
+    print("Leaf moisture: ", end="")
+    print(leafMoisture)
     telemetry = Telemetry(bool(decryptMessage[0]), float(decryptMessage[1]), float(decryptMessage[2]),
                           float(decryptMessage[3]), float(decryptMessage[4]),
                           int(decryptMessage[5]), float(decryptMessage[6]),
                           float(decryptMessage[7]), float(moistureConverter(
                               soilMoisture, edgeConfig.sensorLinearFit)),
-                          float(edgeConfig.fieldCapacity), bool(decryptMessage[9].rstrip('\x00')))
+                          float(edgeConfig.fieldCapacity), leafMoisture)
     plantationID = edgeConfig.plantationID
     actuators = searchActuators(plantationID)
 
@@ -170,6 +173,8 @@ while True:
         wateringNecessary = isWateringNecessary(
             edgeConfig, telemetry.airTemperature, telemetry.airHumidity, soilMoisture, telemetry.leafMoisture)
         packetToSend = watering(actuators, wateringNecessary, key)
+        print("Wattering necessary: ", end="")
+        print(wateringNecessary)
         for element in packetToSend:
             print("Paquete a enviar: ", end="")
             print(element)
