@@ -144,7 +144,7 @@ while True:
     print(decryptMessage)
     decryptMessage = decryptMessage.split(";")
     soilMoisture = int(decryptMessage[8])
-    leafMoisture = bool(int(decryptMessage[9]))
+    leafMoisture = bool(int(decryptMessage[9].rstrip('\x00')))
     print("Leaf moisture: ", end="")
     print(leafMoisture)
     telemetry = Telemetry(bool(decryptMessage[0]), float(decryptMessage[1]), float(decryptMessage[2]),
