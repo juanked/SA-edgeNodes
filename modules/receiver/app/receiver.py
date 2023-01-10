@@ -29,7 +29,7 @@ from EdgeNodeConfiguration import *
 from ActuatorConfiguration import *
 from MQTTConnection import *
 from Telemetry import *
-from dataSuplier import *
+from dataSupplier import *
 from edgeProcessor import *
 
 key = b"smartAgriculture"
